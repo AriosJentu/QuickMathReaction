@@ -12,7 +12,7 @@ class Ariphmetics:																#Class for ariphmetic tasks
 			void set_defaults(self)		- to set default values of parameters
 			dict get(self)				- to get parameters table with it's values: {"parameter":value, ...}
 			string help(self)			- to get help information about mode and it's parameters
-			list generate_task(self)	- to generate task of this game-object with it's parameters, list needs to contain 2 values - [string question, string answer]
+			set generate_task(self)		- to generate task of this game-object with it's parameters, set needs to contain 2 values - (string question, string answer)
 	"""
 
 	def __init__(self):															#Initialization function
