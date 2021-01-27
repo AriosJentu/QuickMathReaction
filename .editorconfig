@@ -1,0 +1,7 @@
+# EditorConfig: https://EditorConfig.org
+root = true
+
+# Tab size for 4
+[*]
+indent_style = tab
+indent_size = 4
