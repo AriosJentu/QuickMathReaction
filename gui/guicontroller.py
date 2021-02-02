@@ -1,7 +1,7 @@
 import curses
 import os
+from datetime import datetime
 
-stdout = []																		#Output array to save log information to print them then
 class Window:																	#Class for special ncurses window
 
 	"""
@@ -21,6 +21,8 @@ class Window:																	#Class for special ncurses window
 		self.word = ""																#Parameter for saving current word
 		self.isdrawable = True														#Parameter for showing keypressed values like typing text
 		self.onkeypress = lambda key: None											#Parameter callback function when key was pressed
+		self.loglist = []															#Parameter list for loggin information
+
 
 	def init(self):																#Initialization of window with ncurses
 		self.window = curses.initscr()												#Create screen
@@ -32,36 +34,55 @@ class Window:																	#Class for special ncurses window
 
 		self.window.nodelay(True)													#Make no delay for keypressing
 
+
+	def log(self, string):														#Function to add information string in log (with timestamp)
+		datestr = "["+datetime.now().strftime("%d/%m/%y %H:%M:%S")+"] "
+		self.loglist.append(datestr+str(string))
+
+
 	def clear(self):															#Default clear ncurses screen
 		self.window.clear()
 
+
 	def write(self, string):													#Write string on screen
 		self.window.addstr(string)
+		self.log("Write string: "+string)
+
 
 	def backspace(self):														#Backspace function for removing last char in ncurses screen
 		y, x = self.window.getyx()													#Get current caret position on screen
 		self.window.addstr(y, x-1, " ")												#Make previous value as empty space at this line
 		self.window.move(y, x-1)													#Move caret to previous character at this line
 
+
 	def readkey(self):															#Function to read key from ncurses												
 		self.key = self.window.getkey()												#Reading key and saving it to the object parameter
 		self.onkeypress(self.key)													#Call function "onkeypress" with current saved key
+		
+		self.log("Read key: '"+str(self.key)+"'")									#Log information about currently read key
+		
 		return self.key
+
 
 	def readinput(self):														#Function to read all input in current word
 		self.readkey()																#Read key from input
-		if self.key in CalculatorWindow.alphabet:									#If key in alphabet - add this key in word
+		self.log("Key '"+
+			str(self.key)+"' is in alphabet: "+
+			str(self.key in Window.alphabet))										#Log informaton about having key in available alphabet
+		
+		if self.key in Window.alphabet:												#If key in alphabet - add this key in word
 			self.word += str(self.key)
 
 		if self.isdrawable:															#If showing keypressed values available, and them in alphabet - draw this keys on screen
-			if self.key in CalculatorWindow.alphabet:
+			if self.key in Window.alphabet:
 				self.write(str(self.key))
 
-			elif self.key in CalculatorWindow.backspaces and len(self.word) > 0:	#But if key not in alphabet, this key is backspace, and length of word is more than 0 (word is not empty)
+			elif self.key in Window.backspaces and len(self.word) > 0:				#But if key not in alphabet, this key is backspace, and length of word is more than 0 (word is not empty)
 				self.backspace()														#Apply backspace function
 				self.word = self.word[:-1]												#And remove last char from word
 
 		return self.word
+
 
 	def clearinput(self):														#Function to clear word from input
 		if self.isdrawable:															#If drawable - apply backspace for all length of word
@@ -69,14 +90,22 @@ class Window:																	#Class for special ncurses window
 				self.backspace()
 		self.word = ""																#And then clear word
 
+
 	def checkinput(self, value):												#Function to check input value with another string value
 		return self.word == value
 
-	def drawinput(self, boolean):												#Function to set input drawable
+
+	def setdrawable(self, boolean):												#Function to set input drawable
 		self.isdrawable = boolean
+
+
+	def printlog(self):															#Function to print all saved log
+		print("\n".join(self.loglist))
+
 
 	def endwin(self):															#Default function to stop window drawing and exit
 		curses.endwin()
+
 
 
 gamewindow = Window()
@@ -93,10 +122,11 @@ gamewindow.onkeypress = sonkeypress
 err = ""
 while x:
 	try:
-		key = gamewindow.readkey()
-		#word = gamewindow.readinput()
+		# key = gamewindow.readkey()
+		word = gamewindow.readinput()
 	except Exception as e:
 		pass
 
 gamewindow.endwin()
-print(stdout)
+gamewindow.log(str(gamewindow.isdrawable))
+gamewindow.printlog()
